@@ -11,9 +11,6 @@ from pytorch_lightning.loggers import WandbLogger
 from validation_metrics import compute_psnr, compute_mse
 from pytorch_lightning.callbacks import ModelCheckpoint
 
-# Verificar si la GPU está disponible
-print(torch.cuda.is_available())  # Esto debe devolver True si tu GPU está disponible.
-
 
 # Configurar el logger de WandB
 wandb_logger = WandbLogger(
@@ -31,7 +28,6 @@ conf_path = "./src/training_step/config_training.yaml"
 # Create dataset with transformations
 train_data = MyImage(0, 200, transform=transforms.Compose([RandomCrop(cropsize)]))
 val_data = MyImage(200, 300, transform=transforms.Compose([RandomCrop(cropsize)]))
-test_data = MyImage(300, 400, transform=transforms.Compose([RandomCrop(cropsize)]))
 
 # Create DataLoader for batching
 train_loader = torch.utils.data.DataLoader(
@@ -40,11 +36,6 @@ train_loader = torch.utils.data.DataLoader(
 
 # Crear DataLoader para validación
 val_loader = torch.utils.data.DataLoader(val_data, batch_size=batch_size, shuffle=False)
-
-# Crear DataLoader para pruebas
-test_loader = torch.utils.data.DataLoader(
-    test_data, batch_size=batch_size, shuffle=False
-)
 
 # Crear un checkpoint callback para guardar los mejores modelos
 checkpoint_callback = ModelCheckpoint(
@@ -58,6 +49,9 @@ checkpoint_callback = ModelCheckpoint(
 )
 
 lit_model = Generic_trainings(conf_path)
+
+# Verificar si la GPU está disponible
+print(torch.cuda.is_available())  # Esto debe devolver True si tu GPU está disponible.
 
 # Si CUDA está disponible, mover el modelo a la GPU
 device = "cuda" if torch.cuda.is_available() else "cpu"

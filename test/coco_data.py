@@ -7,6 +7,7 @@ import imageio
 import torch
 from torch.utils.data import Dataset
 from torchvision import transforms
+import matplotlib.pyplot as plt
 
 # URL of the COCO dataset
 url = "http://images.cocodataset.org/zips/test2014.zip"
