@@ -1,6 +1,6 @@
 model:
-  module: "model_definition"
-  class: "UNet"
+  module: "dummymodel"
+  class: "Random"
 
 training:
   loss:
@@ -10,15 +10,4 @@ training:
     module_optimizer: "torch.optim"
     class_optimizer: "Adam"
     parameters:
-      lr: 0.001
-metrics:
-  - name: "psnr"          # Nombre de la métrica
-    module: "validation_metrics"    # Módulo donde se encuentra la métrica
-    class: "compute_psnr"         # Clase de la métrica
-    parameters: {}
-  - name: "mse"          # Nombre de la métrica
-    module: "validation_metrics"    # Módulo donde se encuentra la métrica
-    class: "compute_mse"         # Clase de la métrica
-    parameters: {}
-  
-  
+      lr: 0.001  
