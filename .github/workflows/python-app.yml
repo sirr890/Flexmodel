@@ -42,5 +42,4 @@ jobs:
 
     - name: Test specific file with pytest
       run: |
-        export PYTHONPATH=$PYTHONPATH:$(pwd)/src
         pytest src/test_generic_training/generic_training_test.py
