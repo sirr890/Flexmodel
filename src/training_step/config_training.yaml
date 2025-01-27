@@ -1,5 +1,5 @@
 model:
-  module: "test_generic_training.dummymodel"
+  module: "dummymodel"
   class: "Random"
 
 training:
