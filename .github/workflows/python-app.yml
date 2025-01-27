@@ -6,13 +6,11 @@ on:
       - main
     paths:
       - src/training_step
-      - src/test_generic_training
   pull_request:
     branches:
       - main
     paths:
       - src/training_step
-      - src/test_generic_training
   workflow_dispatch:
 
 permissions:
