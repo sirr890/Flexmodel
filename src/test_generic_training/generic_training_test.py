@@ -7,11 +7,11 @@ import sys
 import unittest
 
 # AAgregar el directorio raíz del proyecto dinámicamente al sys.path
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../"))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
-from src.training_step.training_module import Generic_trainings
+from training_step.training_module import Generic_trainings
 
 
 class TestGenericTrainings(unittest.TestCase):
