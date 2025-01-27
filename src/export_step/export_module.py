@@ -67,7 +67,7 @@ class ExportationGeneric:
         """
         Crea un nombre de archivo único incrementando versiones si ya existe.
         """
-        os.makedirs(path, exist_ok=True)  # Asegurarse de que el directorio exista
+        os.makedirs(path, exist_ok=True)  # Asegurarse de que el directorio exista.
 
         contador = 1
         archivo = os.path.join(path, f"{nombre_base}_v{contador}{extension}")
