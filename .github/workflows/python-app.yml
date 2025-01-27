@@ -5,13 +5,13 @@ on:
     branches:
       - main
     paths:
-      - src/training_step
+      - src/training_step/**  # Disparar el workflow solo si hay cambios en este directorio
   pull_request:
     branches:
       - main
     paths:
-      - src/training_step
-  workflow_dispatch:
+      - src/training_step/**  # También se activa en pull requests con cambios en este directorio
+  workflow_dispatch:  # Permitir disparar manualmente el workflow
 
 permissions:
   contents: read
@@ -31,19 +31,10 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install flake8 pytest
-        pip install onnx
-        pip install pyyaml
-        pip install torch
-        pip install torchvision
-        pip install torchaudio
-        pip install imageio
-        pip install pytorch-lightning
-        pip install --upgrade torch torchvision
-        pip install onnxruntime pillow numpy
-        pip install tensorflow
+        pip install flake8 pytest onnx pyyaml torch torchvision torchaudio imageio pytorch-lightning \
+                   onnxruntime pillow numpy tensorflow
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-    - name: Test specific file with pytest
+    - name: Run tests for generic_training_test.py
       run: |
         pytest src/test_generic_training/generic_training_test.py
