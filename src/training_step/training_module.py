@@ -43,7 +43,7 @@ class Generic_trainings(pl.LightningModule):
     def load_metrics_from_config(self, config):
         """Carga dinámicamente las métricas desde la configuración YAML."""
         metrics = []
-        # Verificar si "metrics" está definido y no está vacío
+        # Verificar si "metrics" está definido y no está vacío.
         if "metrics" not in config or not config["metrics"]:
             return metrics
 
