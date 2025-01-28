@@ -10,8 +10,11 @@ import onnxruntime
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../"))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
+from export_step import initialize, ExportationGeneric
 
-from export_step.export_module import ExportationGeneric
+# Llama a la función de inicialización del paquete
+initialize()
+# from export_step.export_module import ExportationGeneric
 from test_generic_training.dummyclass import DummyClass
 from training_step.training_module import Generic_trainings
 
@@ -47,6 +50,8 @@ class TestExpOnnx(unittest.TestCase):
         )
 
         self.onnx_path = "onnx_models"
+        # Usa la clase ExportationGeneric
+        self.exporter = ExportationGeneric()
 
     def tearDown(self):
         # Eliminar archivos generados durante las pruebas
@@ -84,8 +89,7 @@ class TestExpOnnx(unittest.TestCase):
 
         # Probar la exportación a ONNX
         try:
-            exp_gen = ExportationGeneric()
-            exp_gen.from_ckpt_to_onnx(
+            onnx_file = self.exporter.from_ckpt_to_onnx(
                 "checkpoints/best_model.ckpt",
                 self.conf_path,
                 self.onnx_path,
@@ -94,7 +98,6 @@ class TestExpOnnx(unittest.TestCase):
             )
 
             # Verificar que el archivo ONNX fue creado
-            onnx_file = os.path.join(self.onnx_path, "onnx_model_v1.onnx")
             self.assertTrue(
                 os.path.exists(onnx_file), "El archivo ONNX no se generó correctamente."
             )

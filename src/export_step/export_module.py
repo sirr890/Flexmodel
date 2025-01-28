@@ -11,7 +11,17 @@ class ExportationGeneric:
 
     def load_model_from_config(self, conf_path):
         """
-        Carga un modelo dinámicamente desde un archivo de configuración YAML.
+        Dynamically loads a model from a YAML configuration file.
+
+        Parameters:
+        conf_path (str): The file path to the YAML configuration file.
+
+        Returns:
+        object: An instance of the model class specified in the configuration file.
+
+        Raises:
+        KeyError: If the required keys ('model', 'module', 'class') are missing in the configuration.
+        ValueError: If there is an error loading the model from the configuration file.
         """
         try:
             with open(conf_path, "r") as file:
@@ -41,7 +51,17 @@ class ExportationGeneric:
 
     def load_checkpoint(self, ckpt_path, model_path):
         """
-        Carga un checkpoint y aplica los pesos al modelo.
+        Loads a checkpoint and applies the weights to the model.
+
+        Parameters:
+        ckpt_path (str): The file path to the checkpoint file.
+        model_path (str): The file path to the model configuration file.
+
+        Returns:
+        object: The model with weights loaded from the checkpoint, set to evaluation mode.
+
+        Raises:
+        ValueError: If there is an error loading the checkpoint or applying the weights.
         """
         try:
             # Cargar el modelo desde la configuración
@@ -65,7 +85,15 @@ class ExportationGeneric:
 
     def crear_version_incremental(self, path, nombre_base, extension=".onnx"):
         """
-        Crea un nombre de archivo único incrementando versiones si ya existe.
+        Creates a unique file name by incrementing version numbers if the file already exists.
+
+        Parameters:
+        path (str): The directory path where the file will be saved.
+        nombre_base (str): The base name for the file.
+        extension (str): The file extension, default is ".onnx".
+
+        Returns:
+        str: A unique file path with an incremented version number.
         """
         os.makedirs(path, exist_ok=True)  # Asegurarse de que el directorio exista.
 
@@ -80,7 +108,19 @@ class ExportationGeneric:
 
     def export_to_onnx(self, model, input_net_size, onnx_path, nombre_base):
         """
-        Exporta un modelo de PyTorch a formato ONNX.
+        Exports a PyTorch model to ONNX format.
+
+        Parameters:
+            model (torch.nn.Module): The PyTorch model to export.
+            input_net_size (tuple): The input dimensions for the model (e.g., (1, 3, 224, 224)).
+            onnx_path (str): The path where the ONNX model will be saved.
+            base_name (str): The base name for the ONNX file, used to create incremental versions.
+
+        Returns:
+            str: The full path of the exported ONNX model.
+
+        Raises:
+            RuntimeError: If an error occurs during the export process.
         """
         try:
             dummy_input = torch.randn(input_net_size)
@@ -106,11 +146,23 @@ class ExportationGeneric:
         self, ckpt_path, model_path, onnx_path, input_net_size, nombre_base
     ):
         """
-        Convierte un modelo de un checkpoint a ONNX.
+        Converts a model from a checkpoint to ONNX format.
+
+        Parameters:
+        ckpt_path (str): The file path to the checkpoint file.
+        model_path (str): The file path to the model configuration file.
+        onnx_path (str): The directory path where the ONNX file will be saved.
+        input_net_size (tuple): The size of the input tensor for the model.
+        nombre_base (str): The base name for the ONNX file.
+
+        Returns:
+        str: The file path to the exported ONNX model.
         """
         try:
             model = self.load_checkpoint(ckpt_path, model_path)
-            self.export_to_onnx(model, input_net_size, onnx_path, nombre_base)
+            onnx_path = self.export_to_onnx(
+                model, input_net_size, onnx_path, nombre_base
+            )
             return onnx_path
         except Exception as e:
             raise RuntimeError(
