@@ -1,0 +1,29 @@
+name: Deploy Sphinx Docs
+
+on:
+  push:
+    branches:
+      - main  # O la rama donde trabajas normalmente
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Install Dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y python3-sphinx
+
+      - name: Build Docs
+        run: |
+          cd docs_sphinx
+          make html
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs_sphinx/_build/html
