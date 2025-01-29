@@ -10,13 +10,15 @@ import onnxruntime
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../"))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
+
+from training_step import initialize, Generic_trainings
 from export_step import initialize, ExportationGeneric
 
 # Llama a la función de inicialización del paquete
 initialize()
+
 # from export_step.export_module import ExportationGeneric
 from test_generic_training.dummyclass import DummyClass
-from training_step.training_module import Generic_trainings
 
 
 class TestExpOnnx(unittest.TestCase):
