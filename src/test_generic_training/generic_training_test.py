@@ -11,7 +11,10 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../"))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
-from training_step.training_module import Generic_trainings
+from training_step import initialize, Generic_trainings
+
+# Llama a la función de inicialización del paquete
+initialize()
 
 
 class TestGenericTrainings(unittest.TestCase):
