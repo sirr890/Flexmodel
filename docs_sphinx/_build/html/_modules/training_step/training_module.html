@@ -1,0 +1,428 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>training_step.training_module &mdash; Documentation 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=2709fde1"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Documentation
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">src</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Documentation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">training_step.training_module</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for training_step.training_module</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pytorch_lightning</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pl</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">yaml</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">importlib</span>
+
+
+<div class="viewcode-block" id="Generic_trainings">
+<a class="viewcode-back" href="../../training_step.html#training_step.training_module.Generic_trainings">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Generic_trainings</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">LightningModule</span><span class="p">):</span>
+<div class="viewcode-block" id="Generic_trainings.load_model_from_config">
+<a class="viewcode-back" href="../../training_step.html#training_step.training_module.Generic_trainings.load_model_from_config">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_model_from_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Loads a model instance dynamically based on the provided configuration.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        - config (dict): A dictionary containing the configuration details for the model.</span>
+<span class="sd">            - &quot;model&quot;: A dictionary with the following keys:</span>
+<span class="sd">                - &quot;module&quot; (str): The name of the module containing the model class.</span>
+<span class="sd">                - &quot;class&quot; (str): The name of the model class to instantiate.</span>
+<span class="sd">                - &quot;parameters&quot; (dict, optional): A dictionary of parameters to pass to the model&#39;s constructor. If not provided, an empty dictionary will be used.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        - model_class: An instance of the model class, created with the specified parameters.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">        - ImportError: If the module cannot be imported.</span>
+<span class="sd">        - AttributeError: If the class cannot be found within the module.</span>
+<span class="sd">        - KeyError: If the &quot;model&quot; key or required sub-keys (&quot;module&quot;, &quot;class&quot;) are missing from the configuration.</span>
+
+<span class="sd">        This function dynamically imports a model module, retrieves the model class by name,</span>
+<span class="sd">        and creates an instance of the class using parameters from the configuration dictionary.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">module_name</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">][</span><span class="s2">&quot;module&quot;</span><span class="p">]</span>
+        <span class="n">class_name</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">][</span><span class="s2">&quot;class&quot;</span><span class="p">]</span>
+        <span class="n">parameters</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+            <span class="s2">&quot;parameters&quot;</span><span class="p">,</span> <span class="p">{}</span>
+        <span class="p">)</span>  <span class="c1"># Cargar parámetros si existen</span>
+        <span class="c1"># Parámetros del modelo a crear a partir del YAML</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">parameters</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">][</span><span class="s2">&quot;parameters&quot;</span><span class="p">]</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">parameters</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># Importar dinámicamente el módulo y la clase</span>
+        <span class="n">module</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">module_name</span><span class="p">)</span>
+        <span class="n">model_class</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_name</span><span class="p">)</span>
+
+        <span class="c1"># Crear una instancia del modelo</span>
+        <span class="k">return</span> <span class="n">model_class</span><span class="p">(</span><span class="o">**</span><span class="n">parameters</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Generic_trainings.get_loss_function">
+<a class="viewcode-back" href="../../training_step.html#training_step.training_module.Generic_trainings.get_loss_function">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_loss_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Dynamically loads a loss function based on the provided configuration.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        - config (dict): A dictionary containing the configuration details for the loss function.</span>
+<span class="sd">            - &quot;training&quot;: A dictionary with the following keys:</span>
+<span class="sd">                - &quot;loss&quot;: A dictionary containing the details of the loss function.</span>
+<span class="sd">                    - &quot;module_loss_function&quot; (str): The name of the module that contains the loss function.</span>
+<span class="sd">                    - &quot;class_loss_function&quot; (str): The name of the loss function class.</span>
+<span class="sd">                    - &quot;parameters&quot; (dict, optional): A dictionary of parameters to pass to the loss function&#39;s constructor. If not provided, an empty dictionary will be used.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        - loss_function (object): An instance of the loss function class, created with the specified parameters.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">        - KeyError: If required keys (&quot;training&quot;, &quot;loss&quot;, &quot;module_loss_function&quot;, &quot;class_loss_function&quot;) are missing from the configuration.</span>
+<span class="sd">        - ImportError: If the specified module cannot be imported.</span>
+<span class="sd">        - AttributeError: If the specified class cannot be found within the module.</span>
+<span class="sd">        - TypeError: If the parameters are not correctly passed to the loss function constructor.</span>
+
+<span class="sd">        This function dynamically imports the module containing the loss function, retrieves the loss function class by name,</span>
+<span class="sd">        and creates an instance of the class using parameters from the configuration dictionary. It ensures that all necessary</span>
+<span class="sd">        configuration keys are present and valid before proceeding.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Extract the loss configuration from the provided config</span>
+            <span class="n">loss_config</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;training&quot;</span><span class="p">][</span><span class="s2">&quot;loss&quot;</span><span class="p">]</span>
+            <span class="n">module_name</span> <span class="o">=</span> <span class="n">loss_config</span><span class="p">[</span><span class="s2">&quot;module_loss_function&quot;</span><span class="p">]</span>
+            <span class="n">class_name</span> <span class="o">=</span> <span class="n">loss_config</span><span class="p">[</span><span class="s2">&quot;class_loss_function&quot;</span><span class="p">]</span>
+            <span class="n">parameters</span> <span class="o">=</span> <span class="n">loss_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;parameters&quot;</span><span class="p">,</span> <span class="p">{})</span>
+
+            <span class="c1"># Dynamically import the module and retrieve the loss function class</span>
+            <span class="n">module</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">module_name</span><span class="p">)</span>
+            <span class="n">loss_function_class</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_name</span><span class="p">)</span>
+
+            <span class="c1"># Instantiate and return the loss function with the given parameters</span>
+            <span class="k">return</span> <span class="n">loss_function_class</span><span class="p">(</span><span class="o">**</span><span class="n">parameters</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Missing required configuration key: </span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+        <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Could not import module: </span><span class="si">{</span><span class="n">module_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Could not find class </span><span class="si">{</span><span class="n">class_name</span><span class="si">}</span><span class="s2"> in module </span><span class="si">{</span><span class="n">module_name</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+        <span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Error when passing parameters to </span><span class="si">{</span><span class="n">class_name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span></div>
+
+
+<div class="viewcode-block" id="Generic_trainings.get_optimizer">
+<a class="viewcode-back" href="../../training_step.html#training_step.training_module.Generic_trainings.get_optimizer">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_optimizer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Dynamically loads an optimizer based on the provided configuration.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        - config (dict): A dictionary containing the configuration details for the optimizer.</span>
+<span class="sd">            - &quot;training&quot;: A dictionary with the following keys:</span>
+<span class="sd">                - &quot;optimizer&quot;: A dictionary containing the details of the optimizer.</span>
+<span class="sd">                    - &quot;module_optimizer&quot; (str): The name of the module that contains the optimizer class.</span>
+<span class="sd">                    - &quot;class_optimizer&quot; (str): The name of the optimizer class.</span>
+<span class="sd">                    - &quot;parameters&quot; (dict, optional): A dictionary of parameters to pass to the optimizer&#39;s constructor. If not provided, an empty dictionary will be used.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        - optimizer (object): An instance of the optimizer class, created with the model&#39;s parameters and specified parameters.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">        - KeyError: If required keys (&quot;training&quot;, &quot;optimizer&quot;, &quot;module_optimizer&quot;, &quot;class_optimizer&quot;) are missing from the configuration.</span>
+<span class="sd">        - ImportError: If the specified module cannot be imported.</span>
+<span class="sd">        - AttributeError: If the specified optimizer class cannot be found within the module.</span>
+<span class="sd">        - TypeError: If the parameters are not correctly passed to the optimizer constructor.</span>
+
+<span class="sd">        This function dynamically imports the module containing the optimizer, retrieves the optimizer class by name,</span>
+<span class="sd">        and creates an instance of the class using the model&#39;s parameters and the configuration parameters.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Extract the optimizer configuration from the provided config</span>
+            <span class="n">optimizer_config</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;training&quot;</span><span class="p">][</span><span class="s2">&quot;optimizer&quot;</span><span class="p">]</span>
+            <span class="n">module_name</span> <span class="o">=</span> <span class="n">optimizer_config</span><span class="p">[</span><span class="s2">&quot;module_optimizer&quot;</span><span class="p">]</span>
+            <span class="n">class_name</span> <span class="o">=</span> <span class="n">optimizer_config</span><span class="p">[</span><span class="s2">&quot;class_optimizer&quot;</span><span class="p">]</span>
+            <span class="n">parameters</span> <span class="o">=</span> <span class="n">optimizer_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;parameters&quot;</span><span class="p">,</span> <span class="p">{})</span>
+
+            <span class="c1"># Dynamically import the module and retrieve the optimizer class</span>
+            <span class="n">module</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">module_name</span><span class="p">)</span>
+            <span class="n">optimizer_class</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_name</span><span class="p">)</span>
+
+            <span class="c1"># Instantiate and return the optimizer with the model&#39;s parameters and given parameters</span>
+            <span class="k">return</span> <span class="n">optimizer_class</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="o">**</span><span class="n">parameters</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Missing required configuration key: </span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+        <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Could not import module: </span><span class="si">{</span><span class="n">module_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Could not find class </span><span class="si">{</span><span class="n">class_name</span><span class="si">}</span><span class="s2"> in module </span><span class="si">{</span><span class="n">module_name</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+        <span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Error when passing parameters to </span><span class="si">{</span><span class="n">class_name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span></div>
+
+
+<div class="viewcode-block" id="Generic_trainings.load_metrics_from_config">
+<a class="viewcode-back" href="../../training_step.html#training_step.training_module.Generic_trainings.load_metrics_from_config">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_metrics_from_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Dynamically loads metrics from the provided configuration.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        - config (dict): A dictionary containing the configuration details for the metrics.</span>
+<span class="sd">            - &quot;metrics&quot; (list): A list of dictionaries, each containing the details of a metric.</span>
+<span class="sd">                - &quot;name&quot; (str): The name of the metric.</span>
+<span class="sd">                - &quot;module&quot; (str): The name of the module containing the metric function.</span>
+<span class="sd">                - &quot;class&quot; (str): The name of the metric function.</span>
+<span class="sd">                - &quot;parameters&quot; (dict, optional): A dictionary of parameters to pass to the metric function&#39;s constructor.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        - list: A list of dictionaries, each containing:</span>
+<span class="sd">            - &quot;name&quot; (str): The name of the metric.</span>
+<span class="sd">            - &quot;func&quot; (function): The loaded metric function.</span>
+<span class="sd">            - &quot;params&quot; (dict): The parameters for the metric function.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">        - KeyError: If the &quot;metrics&quot; key is missing or malformed in the configuration.</span>
+<span class="sd">        - ImportError: If a module cannot be imported.</span>
+<span class="sd">        - AttributeError: If the metric function cannot be found within the module.</span>
+<span class="sd">        - TypeError: If parameters are not correctly passed to the metric function.</span>
+
+<span class="sd">        This function dynamically imports the module containing each metric function,</span>
+<span class="sd">        retrieves the function by name, and returns a list of metrics with their names,</span>
+<span class="sd">        functions, and parameters.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">metrics</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># Verificar si &quot;metrics&quot; está definido y no está vacío.</span>
+        <span class="k">if</span> <span class="s2">&quot;metrics&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">config</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;metrics&quot;</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="n">metrics</span>
+
+        <span class="k">for</span> <span class="n">metric_config</span> <span class="ow">in</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;metrics&quot;</span><span class="p">]:</span>
+            <span class="n">module_name</span> <span class="o">=</span> <span class="n">metric_config</span><span class="p">[</span><span class="s2">&quot;module&quot;</span><span class="p">]</span>
+            <span class="n">class_name</span> <span class="o">=</span> <span class="n">metric_config</span><span class="p">[</span><span class="s2">&quot;class&quot;</span><span class="p">]</span>
+            <span class="n">parameters</span> <span class="o">=</span> <span class="n">metric_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;parameters&quot;</span><span class="p">,</span> <span class="p">{})</span>  <span class="c1"># Parámetros opcionales</span>
+
+            <span class="c1"># Importar dinámicamente el módulo y la clase o función</span>
+            <span class="n">module</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">module_name</span><span class="p">)</span>
+            <span class="n">metric_function</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_name</span><span class="p">)</span>
+
+            <span class="c1"># Agregar la métrica como un diccionario</span>
+            <span class="n">metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">metric_config</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;func&quot;</span><span class="p">:</span> <span class="n">metric_function</span><span class="p">,</span>
+                    <span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="n">parameters</span><span class="p">,</span>
+                <span class="p">}</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">metrics</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">conf_path</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Generic_trainings</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Initializes the training configuration by loading model, loss function, optimizer, and metrics from a YAML configuration file.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">    - conf_path (str): Path to the YAML configuration file containing model, loss function, optimizer, and metrics settings.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">conf_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+            <span class="n">config</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_model_from_config</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loss_function</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_loss_function</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_optimizer</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_metrics_from_config</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Generic_trainings.forward">
+<a class="viewcode-back" href="../../training_step.html#training_step.training_module.Generic_trainings.forward">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Performs a forward pass through the model.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        - x (tensor): Input tensor to the model.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        - tensor: The output of the model after the forward pass.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Generic_trainings.training_step">
+<a class="viewcode-back" href="../../training_step.html#training_step.training_module.Generic_trainings.training_step">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">training_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Performs a training step, computes the loss, and logs the result.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        - batch (tuple): A tuple containing the input data (x) and the corresponding labels (y).</span>
+<span class="sd">            - x (tensor): The input tensor.</span>
+<span class="sd">            - y (tensor): The ground truth labels.</span>
+<span class="sd">        - batch_idx (int): The index of the current batch in the training loop.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        - tensor: The computed loss for the current batch.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">batch</span>
+        <span class="n">logits</span> <span class="o">=</span> <span class="bp">self</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_function</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;train_loss&quot;</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">on_step</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">on_epoch</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">loss</span></div>
+
+
+<div class="viewcode-block" id="Generic_trainings.validation_step">
+<a class="viewcode-back" href="../../training_step.html#training_step.training_module.Generic_trainings.validation_step">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">validation_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Performs the validation step, computes the loss, evaluates metrics, and logs the results.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        - batch (tuple): A tuple containing the input data (x) and the corresponding labels (y).</span>
+<span class="sd">            - x (tensor): The input tensor.</span>
+<span class="sd">            - y (tensor): The ground truth labels.</span>
+<span class="sd">        - batch_idx (int): The index of the current batch in the validation loop.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        - tensor: The computed loss for the current batch.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">batch</span>
+        <span class="n">logits</span> <span class="o">=</span> <span class="bp">self</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_function</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;val_loss&quot;</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">on_step</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">on_epoch</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">prog_bar</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="p">:</span>
+            <span class="n">metric_value</span> <span class="o">=</span> <span class="n">metric</span><span class="p">[</span><span class="s2">&quot;func&quot;</span><span class="p">](</span><span class="n">logits</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="o">**</span><span class="n">metric</span><span class="p">[</span><span class="s2">&quot;params&quot;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;val_</span><span class="si">{</span><span class="n">metric</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">metric_value</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">loss</span></div>
+
+
+<div class="viewcode-block" id="Generic_trainings.test_step">
+<a class="viewcode-back" href="../../training_step.html#training_step.training_module.Generic_trainings.test_step">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Performs the testing step, computes the loss, evaluates metrics, and logs the results.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        - batch (tuple): A tuple containing the input data (x) and the corresponding labels (y).</span>
+<span class="sd">        - batch_idx (int): The index of the current batch in the testing loop.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">        - tensor: The computed loss for the current batch.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">batch</span>
+        <span class="n">logits</span> <span class="o">=</span> <span class="bp">self</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_function</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;test_loss&quot;</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">on_step</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">on_epoch</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="p">:</span>
+            <span class="n">metric_value</span> <span class="o">=</span> <span class="n">metric</span><span class="p">[</span><span class="s2">&quot;func&quot;</span><span class="p">](</span><span class="n">logits</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="o">**</span><span class="n">metric</span><span class="p">[</span><span class="s2">&quot;params&quot;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;test_</span><span class="si">{</span><span class="n">metric</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">metric_value</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">loss</span></div>
+
+
+<div class="viewcode-block" id="Generic_trainings.configure_optimizers">
+<a class="viewcode-back" href="../../training_step.html#training_step.training_module.Generic_trainings.configure_optimizers">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">configure_optimizers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Configures the optimizer for training.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">        - optimizer (object): An instance of the optimizer class, created with the model&#39;s parameters.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, sirr890.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
